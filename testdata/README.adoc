@@ -1,0 +1,10 @@
+= Data to test mergeip
+
+got them from https://www.plover.com/~mjd/misc/merge-networks/
+
+```
+wget -O ALL.tgz https://www.plover.com/~mjd/misc/merge-networks/ALL.tgz &&
+  tar -xvzf ALL.tgz &&
+  rm ALL.tgz &&
+  gzip --best --force */*.in */*.out
+```

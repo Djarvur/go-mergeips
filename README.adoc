@@ -1,0 +1,3 @@
+# mergeips image:https://godoc.org/github.com/Djarvur/go-mergeips?status.svg["GoDoc",link="http://godoc.org/github.com/Djarvur/go-mergeips"] image:https://travis-ci.org/Djarvur/go-mergeips.svg["Build Status",link="https://travis-ci.org/Djarvur/go-mergeips"] image:https://coveralls.io/repos/Djarvur/go-mergeips/badge.svg?branch=master&service=github["Coverage Status",link="https://coveralls.io/github/Djarvur/go-mergeips?branch=master"]
+
+Golang library to merge IP ranges and subnets.
