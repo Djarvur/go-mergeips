@@ -45,6 +45,9 @@ func TestParse(t *testing.T) {
 		nets = ipnet.Sort(nets)
 		fmt.Printf("%v\n", nets)
 
+		nets = ipnet.DedupSorted(nets)
+		fmt.Printf("%v\n", nets)
+
 		merged := ipnet.Merge(nets)
 		if diff := deep.Equal(merged, row.expected); diff != nil {
 			t.Errorf("got %v, expected %v: %v", merged, row.expected, diff)

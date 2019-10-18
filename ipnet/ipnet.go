@@ -79,6 +79,10 @@ func mergeSortedBig(nets []*net.IPNet) []*net.IPNet {
 		bigger, toFill = biggerIPNet(nets[j])
 	}
 
+	if k > 0 {
+		return append(nets[:j+1], nets[k+1:]...)
+	}
+
 	return nets[:j+1]
 }
 

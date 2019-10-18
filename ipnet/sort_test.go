@@ -50,9 +50,9 @@ var testSortData = []testSortRow{
 
 func TestSort(t *testing.T) {
 	for _, row := range testSortData {
-		sorted := ipnet.Sort(row.in)
-		if diff := deep.Equal(sorted, row.expected); diff != nil {
-			t.Errorf("got %v, expected %v: %v", sorted, row.expected, diff)
+		out := ipnet.Sort(row.in)
+		if diff := deep.Equal(out, row.expected); diff != nil {
+			t.Errorf("got %v, expected %v: %v", out, row.expected, diff)
 		}
 	}
 }
