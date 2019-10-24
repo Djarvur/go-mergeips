@@ -13,7 +13,7 @@ import (
 
 // MergeByRepeat is a wrapper around MergeSorted
 func MergeByRepeat(nets []*net.IPNet) []*net.IPNet {
-	return MergeSorted(DedupSorted(Sort(nets)))
+	return MergeSortedByRepeat(DedupSorted(Sort(nets)))
 }
 
 // MergePairs merges all the suitable pairs of subnets in the net.IPNet list
