@@ -9,6 +9,8 @@ import (
 	"net"
 	"strings"
 
+	"github.com/Djarvur/go-mergeips/ipnet"
+
 	"github.com/Djarvur/go-mergeips/iprange"
 )
 
@@ -48,7 +50,7 @@ func Scan(s Scanner) (res []*net.IPNet, err error) {
 // ip address itself, in v4 or v6 notation
 // CIDR subnet address, v4 or v6
 // IP adresses range, v4 or v6, in form begin-end
-// If string is false CIDR form subnet could be defined with not-a-first addrsss in the subnet.
+// If strict is false CIDR form subnet could be defined with not-a-first addrsss in the subnet.
 // Otherwise the error will be returned
 func Parse(s string, strict bool) ([]*net.IPNet, error) {
 	fields := strings.Split(s, "/")
@@ -72,6 +74,11 @@ func Parse(s string, strict bool) ([]*net.IPNet, error) {
 	}
 
 	return parseIP(s)
+}
+
+// Merge merges list of net.IPNet to the smallest possible set
+func Merge(nets []*net.IPNet) []*net.IPNet {
+	return ipnet.MergeSorted(ipnet.DedupSorted(ipnet.Sort(nets)))
 }
 
 func parseCIDR(s string, strict bool) ([]*net.IPNet, error) {

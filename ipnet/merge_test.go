@@ -28,11 +28,32 @@ var testMergeData = []testMergeRow{
 			parseCIDR("192.168.0.8/32"),
 		},
 	},
+	{
+		in: []*net.IPNet{
+			parseCIDR("130.91.7.0/31"),
+			parseCIDR("130.91.7.2/32"),
+			parseCIDR("255.255.255.254/31"),
+		},
+		expected: []*net.IPNet{
+			parseCIDR("130.91.7.0/31"),
+			parseCIDR("130.91.7.2/32"),
+			parseCIDR("255.255.255.254/31"),
+		},
+	},
 }
 
 func TestMerge(t *testing.T) {
 	for _, row := range testMergeData {
-		out := ipnet.Merge(row.in)
+		out := ipnet.MergeSorted(ipnet.DedupSorted(ipnet.Sort(row.in)))
+		if diff := deep.Equal(out, row.expected); diff != nil {
+			t.Errorf("got %v, expected %v: %v", out, row.expected, diff)
+		}
+	}
+}
+
+func TestMergeByRepeat(t *testing.T) {
+	for _, row := range testMergeData {
+		out := ipnet.MergeSortedByRepeat(ipnet.DedupSorted(ipnet.Sort(row.in)))
 		if diff := deep.Equal(out, row.expected); diff != nil {
 			t.Errorf("got %v, expected %v: %v", out, row.expected, diff)
 		}

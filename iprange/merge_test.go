@@ -1,7 +1,6 @@
 package iprange_test
 
 import (
-	"fmt"
 	"net"
 	"testing"
 
@@ -51,7 +50,6 @@ func TestMergeRange(t *testing.T) {
 		if diff := deep.Equal(subnets, r.expected); diff != nil {
 			t.Errorf("got %v, expected %v: %v", subnets, r.expected, diff)
 		}
-		fmt.Printf("subnets: %v\n", subnets)
 	}
 }
 

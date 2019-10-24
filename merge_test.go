@@ -3,6 +3,7 @@ package mergeips_test
 import (
 	"bufio"
 	"compress/gzip"
+	"fmt"
 	"net"
 	"os"
 	"path/filepath"
@@ -30,7 +31,7 @@ var testMergeData = loadFiles(testMergeDataPath, testFileName)
 func TestMergeByRepeat(t *testing.T) {
 	data := testMergeDataCopy(testMergeData)
 	for _, row := range data {
-		merged := ipnet.MergeByRepeat(row.in)
+		merged := ipnet.MergeByRepeat(ipnet.DedupSorted(ipnet.Sort(row.in)))
 		if diff := deep.Equal(merged, row.expected); diff != nil {
 			t.Errorf("%s%s: got %v, expected %v: %v", row.path, row.name, merged, row.expected, diff)
 		}
@@ -40,7 +41,7 @@ func TestMergeByRepeat(t *testing.T) {
 func TestMerge(t *testing.T) {
 	data := testMergeDataCopy(testMergeData)
 	for _, row := range data {
-		merged := ipnet.Merge(row.in)
+		merged := mergeips.Merge(row.in)
 		if diff := deep.Equal(merged, row.expected); diff != nil {
 			t.Errorf("%s%s: got %v, expected %v: %v", row.path, row.name, merged, row.expected, diff)
 		}
@@ -51,7 +52,7 @@ func TestCompare(t *testing.T) {
 	data1 := testMergeDataCopy(testMergeData)
 	data2 := testMergeDataCopy(testMergeData)
 	for ri := range data1 {
-		merged1 := ipnet.Merge(data1[ri].in)
+		merged1 := mergeips.Merge(data1[ri].in)
 		merged2 := ipnet.MergeByRepeat(data2[ri].in)
 		if diff := deep.Equal(merged1, merged2); diff != nil {
 			t.Errorf("%s%s:  %v != %v: %v", data1[ri].path, data1[ri].name, merged1, merged2, diff)
@@ -78,7 +79,7 @@ func BenchmarkMerge(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, row := range data {
-			ipnet.Merge(row.in)
+			mergeips.Merge(row.in)
 		}
 	}
 }
@@ -111,6 +112,10 @@ func loadFiles(path string, name *regexp.Regexp) []testMergeRow {
 	files := listFiles(path, name)
 	data := make([]testMergeRow, 0, len(files))
 	for _, f := range files {
+		out := scanFile(f.path, f.name, ".out.gz")
+		fmt.Printf("out1: %v\n", out)
+		out = ipnet.MergeByRepeat(out)
+		fmt.Printf("out2: %v\n", out)
 		data = append(
 			data,
 			testMergeRow{

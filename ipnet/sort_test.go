@@ -15,6 +15,18 @@ type testSortRow struct {
 
 var testSortData = []testSortRow{
 	{
+		in:       nil,
+		expected: nil,
+	},
+	{
+		in:       []*net.IPNet{},
+		expected: []*net.IPNet{},
+	},
+	{
+		in:       []*net.IPNet{parseCIDR("192.168.0.0/30")},
+		expected: []*net.IPNet{parseCIDR("192.168.0.0/30")},
+	},
+	{
 		in: []*net.IPNet{
 			parseCIDR("192.168.0.4/32"),
 			parseCIDR("192.168.0.0/30"),
@@ -48,9 +60,41 @@ var testSortData = []testSortRow{
 	},
 }
 
+var testDedupData = []testSortRow{
+	{
+		in:       nil,
+		expected: nil,
+	},
+	{
+		in:       []*net.IPNet{},
+		expected: []*net.IPNet{},
+	},
+	{
+		in:       []*net.IPNet{parseCIDR("192.168.0.0/30")},
+		expected: []*net.IPNet{parseCIDR("192.168.0.0/30")},
+	},
+	{
+		in: []*net.IPNet{
+			parseCIDR("192.168.0.0/30"),
+			parseCIDR("192.168.0.0/30"),
+			parseCIDR("192.168.0.0/30"),
+		},
+		expected: []*net.IPNet{parseCIDR("192.168.0.0/30")},
+	},
+}
+
 func TestSort(t *testing.T) {
 	for _, row := range testSortData {
 		out := ipnet.Sort(row.in)
+		if diff := deep.Equal(out, row.expected); diff != nil {
+			t.Errorf("got %v, expected %v: %v", out, row.expected, diff)
+		}
+	}
+}
+
+func TestDedup(t *testing.T) {
+	for _, row := range testDedupData {
+		out := ipnet.DedupSorted(row.in)
 		if diff := deep.Equal(out, row.expected); diff != nil {
 			t.Errorf("got %v, expected %v: %v", out, row.expected, diff)
 		}

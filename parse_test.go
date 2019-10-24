@@ -1,11 +1,8 @@
 package mergeips_test
 
 import (
-	"fmt"
 	"net"
 	"testing"
-
-	"github.com/Djarvur/go-mergeips/ipnet"
 
 	"github.com/Djarvur/go-mergeips"
 	"github.com/go-test/deep"
@@ -40,15 +37,7 @@ func TestParse(t *testing.T) {
 			t.Error(err)
 		}
 
-		fmt.Printf("%v\n", nets)
-
-		nets = ipnet.Sort(nets)
-		fmt.Printf("%v\n", nets)
-
-		nets = ipnet.DedupSorted(nets)
-		fmt.Printf("%v\n", nets)
-
-		merged := ipnet.Merge(nets)
+		merged := mergeips.Merge(nets)
 		if diff := deep.Equal(merged, row.expected); diff != nil {
 			t.Errorf("got %v, expected %v: %v", merged, row.expected, diff)
 		}

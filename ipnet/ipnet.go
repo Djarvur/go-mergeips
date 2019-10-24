@@ -3,6 +3,7 @@ package ipnet
 
 import (
 	"bytes"
+	"fmt"
 	"net"
 	"sort"
 
@@ -33,8 +34,8 @@ func MergePairs(nets []*net.IPNet) []*net.IPNet {
 	return nets[:j+1]
 }
 
-// MergeSorted is repeating MergePairs as long as it does merge anything
-func MergeSorted(nets []*net.IPNet) []*net.IPNet {
+// MergeSortedByRepeat is repeating MergePairs as long as it does merge anything
+func MergeSortedByRepeat(nets []*net.IPNet) []*net.IPNet {
 	for newnets := MergePairs(nets); len(newnets) != len(nets); newnets = MergePairs(nets) {
 		nets = newnets
 	}
@@ -42,48 +43,48 @@ func MergeSorted(nets []*net.IPNet) []*net.IPNet {
 	return nets
 }
 
-// Merge is merging list of net.IPNet to the smallest possible form
-func Merge(nets []*net.IPNet) []*net.IPNet {
-	return mergeSortedBig(DedupSorted(Sort(nets)))
+// MergeSorted is merging previously sorted and de-duped list of net.IPNet to the smallest possible form
+func MergeSorted(nets []*net.IPNet) []*net.IPNet {
+	return mergeSortedBig(nets)
 }
 
 func mergeSortedBig(nets []*net.IPNet) []*net.IPNet {
+	panic("does not work")
 	if len(nets) == 0 {
 		return nets
 	}
 
-	j := 0
-	bigger, toFill := biggerIPNet(nets[j])
-	k := -1
+	doneUpTo := 0
+	bigger, toFill := biggerIPNet(nets[doneUpTo])
+	fullyConsumed := 0
 
-	for i := 1; i < len(nets); i++ {
-		if bigger != nil && bigger.Contains(nets[i].IP) {
-			toFill = toFill.Sub(masks.Get(nets[i].Mask.Size()).Size)
+	for lastChecked := 1; lastChecked < len(nets); lastChecked++ {
+		if bigger != nil && bigger.Contains(nets[lastChecked].IP) {
+			toFill = toFill.Sub(masks.Get(nets[lastChecked].Mask.Size()).Size)
 			if toFill.IsZero() {
-				k = i
-				nets[j] = bigger
-				bigger, toFill = biggerIPNet(nets[j])
+				fmt.Printf("%v %v %v %v %v %v\n", doneUpTo, fullyConsumed, lastChecked, nets[doneUpTo], nets[lastChecked], bigger)
+				nets[doneUpTo] = bigger
+				bigger, toFill = biggerIPNet(nets[doneUpTo])
+				fullyConsumed = lastChecked
 			}
 
 			continue
 		}
 
-		j++
-
-		if k >= 0 {
-			i = k + 1
-			k = -1
+		if fullyConsumed != lastChecked {
+			lastChecked = fullyConsumed
 		}
 
-		nets[j] = nets[i]
-		bigger, toFill = biggerIPNet(nets[j])
+		doneUpTo++
+		nets[doneUpTo] = nets[fullyConsumed]
+		bigger, toFill = biggerIPNet(nets[doneUpTo])
 	}
 
-	if k > 0 {
-		return append(nets[:j+1], nets[k+1:]...)
+	if fullyConsumed < len(nets) {
+		return append(nets[:doneUpTo+1], nets[fullyConsumed:]...)
 	}
 
-	return nets[:j+1]
+	return nets[:doneUpTo+1]
 }
 
 func biggerIPNet(n *net.IPNet) (*net.IPNet, bigint.Int) {
@@ -122,6 +123,10 @@ func Less(a, b *net.IPNet) bool {
 
 // DedupSorted removes all the identical or included-in-bigger-one-presented sublens from the list
 func DedupSorted(nets []*net.IPNet) []*net.IPNet {
+	if len(nets) == 0 {
+		return nets
+	}
+
 	j := 0
 
 	for i := 1; i < len(nets); i++ {
